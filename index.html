@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyAnyu.com - A Special Surprise For Ananya 💕</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="no-scroll">
+    <!-- Page 1: Claim Gift Hamper -->
+    <div id="claimPage" class="page active full-screen">
+        <div class="page-center">
+            <div class="gift-wrapper">
+                <div class="gift-container">
+                    <div class="gift-box">
+                        <div class="gift-top"></div>
+                        <div class="gift-front"></div>
+                        <div class="gift-ribbon"></div>
+                        <div class="gift-shine"></div>
+                        <div class="gift-particles"></div>
+                    </div>
+                </div>
+                <h1 class="title slide-in-title">🎁 Hey Ananya! 🎁</h1>
+                <p class="subtitle fade-in">You Got a Special Gift!</p>
+                <p class="subtitle-small fade-in">Click below to claim your surprise...</p>
+                <button id="claimBtn" class="btn btn-primary pulse-btn">Claim Your Gift</button>
+            </div>
+            <div class="floating-stars">
+                <span class="star">✨</span>
+                <span class="star">⭐</span>
+                <span class="star">✨</span>
+                <span class="star">⭐</span>
+                <span class="star">✨</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2: Dating Proposal -->
+    <div id="proposalPage" class="page full-screen">
+        <div class="page-center">
+            <div class="reveal-wrapper">
+                <div class="reveal-box slide-up">
+                    <h1 class="reveal-title">✨ Ananya... ✨</h1>
+                    <div class="name-reveal">
+                        <h2 class="boy-name bounce-in">💙 YASH 💙</h2>
+                    </div>
+                    <p class="subtitle-proposal fade-in-delay">The boy in your heart secretly! 💕</p>
+                </div>
+
+                <div class="question-box slide-up-delay">
+                    <h3 class="question">Would you like to date him? 💑</h3>
+                    <div class="buttons-container">
+                        <button id="noBtn" class="btn btn-secondary shake-btn">No</button>
+                        <button id="yesBtnInitial" class="btn btn-success">Yes</button>
+                    </div>
+                </div>
+
+                <!-- Emoji message (appears after 5 no attempts) -->
+                <div id="emojiMessage" class="emoji-message hidden">
+                    <div class="angry-emoji bounce-emoji">😠💕</div>
+                    <p class="emoji-text">What's wrong with dating me?? 🥺 Please...</p>
+                    <button id="yesBtnFinal" class="btn btn-success btn-large pulse-btn">YES! ❤️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration Page -->
+    <div id="celebrationPage" class="page full-screen">
+        <div class="page-center">
+            <div class="celebration-wrapper">
+                <div class="celebration-content zoom-in">
+                    <h1 class="celebration-title bounce">🎉 YES! 🎉</h1>
+                    <p class="celebration-message">Ananya, I knew you felt the same! 💕</p>
+                    <div class="hearts-animation"></div>
+                </div>
+                <div class="confetti-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
