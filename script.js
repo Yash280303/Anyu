@@ -1,4 +1,4 @@
-// Page elements
+// ── Page references ──────────────────────────────────────────────────────────
 let claimPage, proposalPage, dateLocationPage, celebrationPage;
 let claimBtn, noBtn, yesBtnInitial, yesBtnFinal, emojiMessage, questionBox;
 let locationBtns = [];
@@ -7,293 +7,220 @@ let selectedLocation = '';
 let noClickCount = 0;
 const MAX_NO_CLICKS = 5;
 
-// Funny messages for each attempt
-const funnyMessages = [
-    "Oh no you don't! 😄",
-    "Nice try! 😝",
-    "Come on! 😊",
-    "You almost got me! 😏",
-    "Last chance! 😉"
+// Cute popup messages shown on each No attempt
+const noMessages = [
+    { text: "Nahi nahi! 😂 Try again!", color: "#ff6b9d" },
+    { text: "Seriously? 😜 Nice try!", color: "#764ba2" },
+    { text: "Arre yaar! 😅 Come on!", color: "#ff8e72" },
+    { text: "Almost! 😏 So close...", color: "#667eea" },
+    { text: "Last chance! 😉 Think again!", color: "#ff1493" }
 ];
 
-// Initialize everything when DOM is ready
+// ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-    // Get all elements
-    claimPage = document.getElementById('claimPage');
-    proposalPage = document.getElementById('proposalPage');
+    claimPage        = document.getElementById('claimPage');
+    proposalPage     = document.getElementById('proposalPage');
     dateLocationPage = document.getElementById('dateLocationPage');
-    celebrationPage = document.getElementById('celebrationPage');
+    celebrationPage  = document.getElementById('celebrationPage');
 
-    claimBtn = document.getElementById('claimBtn');
-    noBtn = document.getElementById('noBtn');
+    claimBtn      = document.getElementById('claimBtn');
+    noBtn         = document.getElementById('noBtn');
     yesBtnInitial = document.getElementById('yesBtnInitial');
-    yesBtnFinal = document.getElementById('yesBtnFinal');
-    emojiMessage = document.getElementById('emojiMessage');
-    questionBox = document.querySelector('.question-box');
-    locationBtns = document.querySelectorAll('.location-btn');
+    yesBtnFinal   = document.getElementById('yesBtnFinal');
+    emojiMessage  = document.getElementById('emojiMessage');
+    questionBox   = document.querySelector('.question-box');
+    locationBtns  = document.querySelectorAll('.location-btn');
 
-    console.log('Elements loaded:', {
-        claimBtn: !!claimBtn,
-        noBtn: !!noBtn,
-        yesBtnInitial: !!yesBtnInitial,
-        locationBtns: locationBtns.length
-    });
+    // ── Claim button ──
+    claimBtn.addEventListener('click', showProposal);
 
-    // Event Listeners
-    if (claimBtn) {
-        claimBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Claim button clicked');
-            showProposal();
-        });
-    }
-    
-    if (yesBtnInitial) {
-        yesBtnInitial.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Yes initial button clicked');
-            showDateLocation();
-        });
-    }
-    
-    if (yesBtnFinal) {
-        yesBtnFinal.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Yes final button clicked');
-            showDateLocation();
-        });
-    }
-    
-    if (noBtn) {
-        noBtn.addEventListener('mouseover', handleNoBtnHover);
-        noBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleNoClick();
-        });
-    }
+    // ── Yes buttons ──
+    yesBtnInitial.addEventListener('click', showDateLocation);
+    yesBtnFinal.addEventListener('click', showDateLocation);
 
-    // Location button listeners
-    locationBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleLocationSelect(e);
-        });
-    });
+    // ── No button — on mouseover just run away, on click count + popup ──
+    noBtn.addEventListener('mouseover', runNoButton);
+    noBtn.addEventListener('click', handleNoClick);
+
+    // ── Location buttons ──
+    locationBtns.forEach(btn => btn.addEventListener('click', handleLocationSelect));
+
+    // ── Mouse proximity: chase the No button away before cursor even touches ──
+    document.addEventListener('mousemove', chaseNoButton);
 });
 
-// Function to show proposal page
+// ── Page transitions ──────────────────────────────────────────────────────────
 function showProposal() {
-    console.log('showProposal called');
-    if (claimPage) claimPage.classList.remove('active');
-    if (proposalPage) proposalPage.classList.add('active');
+    claimPage.classList.remove('active');
+    proposalPage.classList.add('active');
+
+    // Fully reset No button state
     noClickCount = 0;
-    
-    // Make sure no button is visible and in correct position
-    setTimeout(() => {
-        if (noBtn) {
-            noBtn.style.display = 'inline-block';
-            noBtn.style.position = 'relative';
-            noBtn.style.left = '';
-            noBtn.style.top = '';
-            noBtn.style.visibility = 'visible';
-            console.log('No button reset');
-        }
-    }, 100);
+    resetNoButton();
 }
 
-// Function to handle No button hover
-function handleNoBtnHover(e) {
-    // Only move if we haven't reached max attempts
-    if (noClickCount < MAX_NO_CLICKS) {
-        moveNoButtonAway();
-    }
+function showDateLocation() {
+    proposalPage.classList.remove('active');
+    dateLocationPage.classList.add('active');
 }
 
-// Function to move No button to random position
-function moveNoButtonAway() {
-    const btnWidth = 150;
-    const btnHeight = 50;
-    const padding = 50;
-    
-    // Calculate safe boundaries
-    const maxX = window.innerWidth - btnWidth - padding;
-    const maxY = window.innerHeight - btnHeight - padding;
-    
-    const randomX = Math.max(padding, Math.random() * maxX);
-    const randomY = Math.max(padding, Math.random() * maxY);
-    
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = randomX + 'px';
-    noBtn.style.top = randomY + 'px';
-    noBtn.style.transition = 'all 0.3s ease';
+function handleLocationSelect(e) {
+    selectedLocation = e.currentTarget.getAttribute('data-location');
+    showCelebration();
 }
 
-// Function to handle No button click
-function handleNoClick() {
-    console.log('No button clicked, count:', noClickCount);
+function showCelebration() {
+    dateLocationPage.classList.remove('active');
+    celebrationPage.classList.add('active');
+
+    const locationEmojis = {
+        'Restaurant': '🍽️', 'Movie': '🎬', 'Beach': '🏖️',
+        'Park': '🌳',        'Coffee': '☕', 'Adventure': '🎢'
+    };
+    const emoji = locationEmojis[selectedLocation] || '💕';
+    document.getElementById('locationDisplay').innerHTML =
+        `${emoji} Let's go to <strong>${selectedLocation}</strong>! 💕`;
+
+    createHearts();
+    createConfetti();
+}
+
+// ── No button logic ───────────────────────────────────────────────────────────
+
+// Reset No button back to its natural position inside the layout
+function resetNoButton() {
+    noBtn.style.position   = '';
+    noBtn.style.left       = '';
+    noBtn.style.top        = '';
+    noBtn.style.transform  = '';
+    noBtn.style.transition = '';
+    noBtn.style.display    = '';
+    noBtn.style.opacity    = '1';
+    noBtn.style.visibility = 'visible';
+}
+
+// Teleport No button to a random spot on screen (position: fixed)
+function runNoButton() {
+    if (noClickCount >= MAX_NO_CLICKS) return;
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const bw = 120, bh = 50, pad = 60;
+
+    const x = pad + Math.random() * (w - bw - pad * 2);
+    const y = pad + Math.random() * (h - bh - pad * 2);
+
+    noBtn.style.position   = 'fixed';
+    noBtn.style.left       = x + 'px';
+    noBtn.style.top        = y + 'px';
+    noBtn.style.transition = 'left 0.25s ease, top 0.25s ease';
+    noBtn.style.display    = 'block';
+    noBtn.style.opacity    = '1';
+    noBtn.style.visibility = 'visible';
+}
+
+// Move away if mouse gets within 130 px
+function chaseNoButton(e) {
+    if (!proposalPage || !proposalPage.classList.contains('active')) return;
+    if (noClickCount >= MAX_NO_CLICKS) return;
+    if (!noBtn) return;
+
+    const rect = noBtn.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+
+    if (dist < 130) runNoButton();
+}
+
+// Called when No is actually clicked
+function handleNoClick(e) {
+    e.stopPropagation();
     noClickCount++;
-    
-    if (noClickCount <= MAX_NO_CLICKS) {
-        moveNoButtonAway();
-        // Show funny message floating away
-        showFunnyMessage(noClickCount);
-    }
-    
-    // Show emoji message on 6th attempt (after 5 failed clicks)
-    if (noClickCount === MAX_NO_CLICKS) {
-        console.log('Max clicks reached, showing emoji');
-        setTimeout(() => {
-            showEmojiMessage();
-        }, 300);
+
+    if (noClickCount < MAX_NO_CLICKS) {
+        // Show a cute popup then run away
+        showPopup(noMessages[noClickCount - 1]);
+        runNoButton();
+    } else if (noClickCount === MAX_NO_CLICKS) {
+        // 5th click: show last message, run away, then after a beat show emoji screen
+        showPopup(noMessages[MAX_NO_CLICKS - 1]);
+        runNoButton();
+        setTimeout(showEmojiMessage, 900);
     }
 }
 
-// Function to show funny floating messages
-function showFunnyMessage(attemptNumber) {
-    const message = funnyMessages[attemptNumber - 1] || funnyMessages[funnyMessages.length - 1];
-    const floatingMsg = document.createElement('div');
-    floatingMsg.textContent = message;
-    floatingMsg.style.position = 'fixed';
-    floatingMsg.style.left = Math.random() * (window.innerWidth - 200) + 100 + 'px';
-    floatingMsg.style.top = Math.random() * (window.innerHeight - 200) + 100 + 'px';
-    floatingMsg.style.fontSize = '1.5em';
-    floatingMsg.style.fontWeight = 'bold';
-    floatingMsg.style.color = '#ff6b9d';
-    floatingMsg.style.zIndex = '999';
-    floatingMsg.style.pointerEvents = 'none';
-    floatingMsg.style.animation = 'floatAway 1.5s ease-out forwards';
-    floatingMsg.style.textShadow = '2px 2px 4px rgba(0,0,0,0.3)';
-    
-    document.body.appendChild(floatingMsg);
-    
-    setTimeout(() => floatingMsg.remove(), 1500);
+// Floating popup bubble near current No button position
+function showPopup(msg) {
+    const rect = noBtn.getBoundingClientRect();
+
+    const popup = document.createElement('div');
+    popup.textContent = msg.text;
+    popup.style.cssText = `
+        position: fixed;
+        left: ${rect.left + rect.width / 2}px;
+        top:  ${rect.top - 10}px;
+        transform: translate(-50%, -100%);
+        background: white;
+        color: ${msg.color};
+        font-size: 1.3em;
+        font-weight: 800;
+        padding: 10px 20px;
+        border-radius: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        pointer-events: none;
+        z-index: 9999;
+        white-space: nowrap;
+        animation: popupAnim 1.2s ease-out forwards;
+    `;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1200);
 }
 
-// Function to show emoji message
+// After 5 clicks: hide question-box, show angry emoji card
 function showEmojiMessage() {
-    if (questionBox && emojiMessage) {
-        questionBox.classList.add('hidden');
+    // hide the No button completely
+    noBtn.style.display = 'none';
+
+    if (questionBox)  questionBox.classList.add('hidden');
+    if (emojiMessage) {
         emojiMessage.classList.remove('hidden');
         emojiMessage.classList.add('show');
     }
 }
 
-// Function to show date location page
-function showDateLocation() {
-    console.log('showDateLocation called');
-    if (proposalPage) proposalPage.classList.remove('active');
-    if (dateLocationPage) dateLocationPage.classList.add('active');
-}
-
-// Function to handle location selection
-function handleLocationSelect(e) {
-    console.log('Location selected');
-    const btn = e.currentTarget;
-    selectedLocation = btn.getAttribute('data-location');
-    console.log('Selected location:', selectedLocation);
-    
-    // Show celebration with selected location
-    showCelebration();
-}
-
-// Function to show celebration with location
-function showCelebration() {
-    console.log('showCelebration called');
-    if (dateLocationPage) dateLocationPage.classList.remove('active');
-    if (celebrationPage) celebrationPage.classList.add('active');
-    
-    // Display selected location
-    const locationDisplay = document.getElementById('locationDisplay');
-    if (locationDisplay && selectedLocation) {
-        const locationEmojis = {
-            'Restaurant': '🍽️',
-            'Movie': '🎬',
-            'Beach': '🏖️',
-            'Park': '🌳',
-            'Coffee': '☕',
-            'Adventure': '🎢'
-        };
-        
-        const emoji = locationEmojis[selectedLocation] || '💕';
-        locationDisplay.innerHTML = `${emoji} Let's go to <strong>${selectedLocation}</strong>! 💕`;
-        console.log('Location display updated:', selectedLocation);
-    }
-    
-    // Start celebration effects
-    startCelebration();
-}
-
-// Function to start celebration
-function startCelebration() {
-    createHearts();
-    createConfetti();
-}
-
-// Function to create floating hearts
+// ── Celebration effects ───────────────────────────────────────────────────────
 function createHearts() {
-    const heartsContainer = document.querySelector('.hearts-animation');
-    if (!heartsContainer) return;
-    
-    const hearts = ['❤️', '💕', '💖', '💗', '💝'];
-    
-    for (let i = 0; i < 15; i++) {
+    const container = document.querySelector('.hearts-animation');
+    if (!container) return;
+    const types = ['❤️','💕','💖','💗','💝'];
+    for (let i = 0; i < 18; i++) {
         setTimeout(() => {
-            const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-            heart.style.left = (Math.random() * 100) + '%';
-            heart.style.animationDelay = '0s';
-            heart.style.animationDuration = (2 + Math.random() * 1) + 's';
-            heartsContainer.appendChild(heart);
-            
-            setTimeout(() => heart.remove(), 3000);
-        }, i * 200);
+            const h = document.createElement('div');
+            h.className = 'heart';
+            h.textContent = types[Math.floor(Math.random() * types.length)];
+            h.style.left = Math.random() * 100 + '%';
+            h.style.animationDuration = (2 + Math.random()) + 's';
+            container.appendChild(h);
+            setTimeout(() => h.remove(), 3000);
+        }, i * 180);
     }
 }
 
-// Function to create confetti
 function createConfetti() {
-    const confettiContainer = document.querySelector('.confetti-container');
-    if (!confettiContainer) return;
-    
-    const colors = ['#ff6b9d', '#ffd700', '#00d4ff', '#764ba2', '#ff8e72'];
-    
-    for (let i = 0; i < 50; i++) {
+    const container = document.querySelector('.confetti-container');
+    if (!container) return;
+    const colors = ['#ff6b9d','#ffd700','#00d4ff','#764ba2','#ff8e72'];
+    for (let i = 0; i < 60; i++) {
         setTimeout(() => {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * 100 + '%';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.animationDuration = (2 + Math.random() * 1) + 's';
-            confetti.style.animationDelay = Math.random() * 0.5 + 's';
-            confettiContainer.appendChild(confetti);
-            
-            setTimeout(() => confetti.remove(), 4000);
-        }, i * 30);
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDuration  = (2 + Math.random()) + 's';
+            c.style.animationDelay = Math.random() * 0.5 + 's';
+            container.appendChild(c);
+            setTimeout(() => c.remove(), 4000);
+        }, i * 25);
     }
 }
-
-// Add mousemove listener for more responsive button evasion (only on proposal page)
-document.addEventListener('mousemove', (e) => {
-    if (!proposalPage.classList.contains('active') || noClickCount >= MAX_NO_CLICKS) {
-        return;
-    }
-    
-    if (!noBtn) return;
-    
-    const rect = noBtn.getBoundingClientRect();
-    const distance = Math.hypot(
-        e.clientX - (rect.left + rect.width / 2),
-        e.clientY - (rect.top + rect.height / 2)
-    );
-    
-    // Move button if cursor is within 120px
-    if (distance < 120 && noBtn.style.position !== 'fixed') {
-        moveNoButtonAway();
-    }
-});
