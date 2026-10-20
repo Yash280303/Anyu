@@ -1,21 +1,11 @@
 // Page elements
-const claimPage = document.getElementById('claimPage');
-const proposalPage = document.getElementById('proposalPage');
-const dateLocationPage = document.getElementById('dateLocationPage');
-const celebrationPage = document.getElementById('celebrationPage');
-
-const claimBtn = document.getElementById('claimBtn');
-const noBtn = document.getElementById('noBtn');
-const yesBtnInitial = document.getElementById('yesBtnInitial');
-const yesBtnFinal = document.getElementById('yesBtnFinal');
-const emojiMessage = document.getElementById('emojiMessage');
-const questionBox = document.querySelector('.question-box');
-const locationBtns = document.querySelectorAll('.location-btn');
+let claimPage, proposalPage, dateLocationPage, celebrationPage;
+let claimBtn, noBtn, yesBtnInitial, yesBtnFinal, emojiMessage, questionBox;
+let locationBtns = [];
 
 let selectedLocation = '';
 let noClickCount = 0;
 const MAX_NO_CLICKS = 5;
-let noBtnOriginalPosition = null;
 
 // Funny messages for each attempt
 const funnyMessages = [
@@ -26,43 +16,92 @@ const funnyMessages = [
     "Last chance! 😉"
 ];
 
-// Event Listeners - Wait for page to load
+// Initialize everything when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
+    // Get all elements
+    claimPage = document.getElementById('claimPage');
+    proposalPage = document.getElementById('proposalPage');
+    dateLocationPage = document.getElementById('dateLocationPage');
+    celebrationPage = document.getElementById('celebrationPage');
+
+    claimBtn = document.getElementById('claimBtn');
+    noBtn = document.getElementById('noBtn');
+    yesBtnInitial = document.getElementById('yesBtnInitial');
+    yesBtnFinal = document.getElementById('yesBtnFinal');
+    emojiMessage = document.getElementById('emojiMessage');
+    questionBox = document.querySelector('.question-box');
+    locationBtns = document.querySelectorAll('.location-btn');
+
+    console.log('Elements loaded:', {
+        claimBtn: !!claimBtn,
+        noBtn: !!noBtn,
+        yesBtnInitial: !!yesBtnInitial,
+        locationBtns: locationBtns.length
+    });
+
+    // Event Listeners
     if (claimBtn) {
-        claimBtn.addEventListener('click', showProposal);
+        claimBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Claim button clicked');
+            showProposal();
+        });
     }
     
     if (yesBtnInitial) {
-        yesBtnInitial.addEventListener('click', showDateLocation);
+        yesBtnInitial.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Yes initial button clicked');
+            showDateLocation();
+        });
     }
     
     if (yesBtnFinal) {
-        yesBtnFinal.addEventListener('click', showDateLocation);
+        yesBtnFinal.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Yes final button clicked');
+            showDateLocation();
+        });
     }
     
     if (noBtn) {
         noBtn.addEventListener('mouseover', handleNoBtnHover);
-        noBtn.addEventListener('click', handleNoClick);
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleNoClick();
+        });
     }
 
     // Location button listeners
     locationBtns.forEach(btn => {
-        btn.addEventListener('click', handleLocationSelect);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleLocationSelect(e);
+        });
     });
 });
 
 // Function to show proposal page
 function showProposal() {
-    claimPage.classList.remove('active');
-    proposalPage.classList.add('active');
+    console.log('showProposal called');
+    if (claimPage) claimPage.classList.remove('active');
+    if (proposalPage) proposalPage.classList.add('active');
     noClickCount = 0;
     
-    // Reset no button position after a short delay
+    // Make sure no button is visible and in correct position
     setTimeout(() => {
         if (noBtn) {
+            noBtn.style.display = 'inline-block';
             noBtn.style.position = 'relative';
             noBtn.style.left = '';
             noBtn.style.top = '';
+            noBtn.style.visibility = 'visible';
+            console.log('No button reset');
         }
     }, 100);
 }
@@ -95,10 +134,8 @@ function moveNoButtonAway() {
 }
 
 // Function to handle No button click
-function handleNoClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
+function handleNoClick() {
+    console.log('No button clicked, count:', noClickCount);
     noClickCount++;
     
     if (noClickCount <= MAX_NO_CLICKS) {
@@ -109,6 +146,7 @@ function handleNoClick(e) {
     
     // Show emoji message on 6th attempt (after 5 failed clicks)
     if (noClickCount === MAX_NO_CLICKS) {
+        console.log('Max clicks reached, showing emoji');
         setTimeout(() => {
             showEmojiMessage();
         }, 300);
@@ -146,22 +184,18 @@ function showEmojiMessage() {
 }
 
 // Function to show date location page
-function showDateLocation(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    proposalPage.classList.remove('active');
-    dateLocationPage.classList.add('active');
+function showDateLocation() {
+    console.log('showDateLocation called');
+    if (proposalPage) proposalPage.classList.remove('active');
+    if (dateLocationPage) dateLocationPage.classList.add('active');
 }
 
 // Function to handle location selection
 function handleLocationSelect(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
+    console.log('Location selected');
     const btn = e.currentTarget;
     selectedLocation = btn.getAttribute('data-location');
+    console.log('Selected location:', selectedLocation);
     
     // Show celebration with selected location
     showCelebration();
@@ -169,12 +203,13 @@ function handleLocationSelect(e) {
 
 // Function to show celebration with location
 function showCelebration() {
-    dateLocationPage.classList.remove('active');
-    celebrationPage.classList.add('active');
+    console.log('showCelebration called');
+    if (dateLocationPage) dateLocationPage.classList.remove('active');
+    if (celebrationPage) celebrationPage.classList.add('active');
     
     // Display selected location
     const locationDisplay = document.getElementById('locationDisplay');
-    if (locationDisplay) {
+    if (locationDisplay && selectedLocation) {
         const locationEmojis = {
             'Restaurant': '🍽️',
             'Movie': '🎬',
@@ -186,6 +221,7 @@ function showCelebration() {
         
         const emoji = locationEmojis[selectedLocation] || '💕';
         locationDisplay.innerHTML = `${emoji} Let's go to <strong>${selectedLocation}</strong>! 💕`;
+        console.log('Location display updated:', selectedLocation);
     }
     
     // Start celebration effects
